@@ -27,7 +27,7 @@ function GoTestPlayground() {
 
     const checkGoServerStatus = async () => {
         try {
-            const response = await fetch('http://localhost:8080/health');
+            const response = await fetch('/api/go/health');
             if (response.ok) {
                 setGoServerStatus('connected');
             } else {
@@ -117,7 +117,7 @@ function GoTestPlayground() {
 
         setSavingOptions(true);
         try {
-            const response = await fetch('http://localhost:8080/api/saveOptions', {
+            const response = await fetch('/api/go/saveOptions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,8 +172,8 @@ function GoTestPlayground() {
             const app = new SelfAppBuilder({
                 appName: "Self Playground - Go Server Test",
                 scope: "self-playground-go",
-                endpoint: "https://playground-two-psi.vercel.app/api/verify",
-                endpointType: "https", // Using Vercel endpoint for Self SDK (HTTPS required)
+                endpoint: `${window.location.origin}/api/go/verify`,
+                endpointType: "https", // HTTPS required for Self SDK
                 logoBase64: "https://i.imgur.com/Rz8B3s7.png",
                 userId,
                 disclosures: {
@@ -241,10 +241,10 @@ function GoTestPlayground() {
                     <div className="flex">
                         <div className="ml-3">
                             <p className="text-sm text-red-700">
-                                <strong>Go Server Connection Error:</strong> Make sure the Go server is running on localhost:8080
+                                <strong>Go Server Connection Error:</strong> Vercel Go functions not responding
                             </p>
                             <p className="text-sm text-red-600 mt-1">
-                                Run: <code className="bg-red-100 px-1 rounded">cd go-server && go run main.go</code>
+                                Check Vercel deployment status or try refreshing the page
                             </p>
                         </div>
                     </div>
@@ -274,10 +274,10 @@ function GoTestPlayground() {
                             User ID: {userId!.substring(0, 8)}...
                         </p>
                         <p className="text-xs text-blue-600 mt-1">
-                            Options API: Go Server (localhost:8080)
+                            Backend: Go Server (Vercel)
                         </p>
                         <p className="text-xs text-gray-500 mt-1">
-                            Verify API: Vercel (HTTPS required)
+                            All APIs: Go Functions
                         </p>
                     </div>
 

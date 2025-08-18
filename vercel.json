@@ -1,0 +1,27 @@
+{
+  "functions": {
+    "api/go-health.go": {
+      "runtime": "@vercel/go"
+    },
+    "api/go-saveOptions.go": {
+      "runtime": "@vercel/go"
+    },
+    "api/go-verify.go": {
+      "runtime": "@vercel/go"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/go/health",
+      "destination": "/api/go-health"
+    },
+    {
+      "source": "/api/go/saveOptions",
+      "destination": "/api/go-saveOptions"
+    },
+    {
+      "source": "/api/go/verify",
+      "destination": "/api/go-verify"
+    }
+  ]
+}
