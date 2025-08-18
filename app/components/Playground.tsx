@@ -157,7 +157,7 @@ function Playground() {
             const app = new SelfAppBuilder({
                 appName: "Self Playground",
                 scope: "self-playground",
-                endpoint: "https://playground.self.xyz/api/verify",
+                endpoint: "https://playground-two-psi.vercel.app/api/verify",
                 // endpoint: "https://c622-118-169-75-84.ngrok-free.app/api/verify",
                 endpointType: "https",
                 logoBase64: "https://i.imgur.com/Rz8B3s7.png",
