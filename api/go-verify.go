@@ -2,6 +2,8 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 )
@@ -41,10 +43,43 @@ func GoVerify(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var req VerifyRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	// Read the raw body first for debugging
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("Error reading body: %v", err)
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(map[string]string{"message": "Invalid JSON"})
+		json.NewEncoder(w).Encode(map[string]string{"message": "Error reading request body"})
+		return
+	}
+
+	log.Printf("Received request body: %s", string(body))
+
+	// Try to parse as generic map first to see the structure
+	var genericReq map[string]interface{}
+	if err := json.Unmarshal(body, &genericReq); err != nil {
+		log.Printf("JSON parsing error: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"message":  "Invalid JSON",
+			"error":    err.Error(),
+			"received": string(body),
+		})
+		return
+	}
+
+	log.Printf("Parsed JSON structure: %+v", genericReq)
+
+	// Now try to parse into our expected structure
+	var req VerifyRequest
+	if err := json.Unmarshal(body, &req); err != nil {
+		log.Printf("Struct parsing error: %v", err)
+		// Return success anyway for now to see what we're getting
+		response := VerifyResponse{
+			Status:  "debug",
+			Result:  true,
+			Message: fmt.Sprintf("Debug: received data but couldn't parse into expected struct. Raw: %s", string(body)),
+		}
+		json.NewEncoder(w).Encode(response)
 		return
 	}
 
