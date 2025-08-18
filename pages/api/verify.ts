@@ -57,7 +57,7 @@ export default async function handler(
       const selfBackendVerifier = new SelfBackendVerifier(
         "self-playground",
         "https://playground-two-psi.vercel.app/api/verify",
-        false,
+        true,
         AllIds,
         configStore,
         "uuid"
