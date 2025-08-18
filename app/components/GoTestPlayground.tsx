@@ -27,7 +27,7 @@ function GoTestPlayground() {
 
     const checkGoServerStatus = async () => {
         try {
-            const response = await fetch('/api/go/health');
+            const response = await fetch('/api/go-health');
             if (response.ok) {
                 setGoServerStatus('connected');
             } else {
@@ -117,7 +117,7 @@ function GoTestPlayground() {
 
         setSavingOptions(true);
         try {
-            const response = await fetch('/api/go/saveOptions', {
+            const response = await fetch('/api/go-saveOptions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -172,7 +172,7 @@ function GoTestPlayground() {
             const app = new SelfAppBuilder({
                 appName: "Self Playground - Go Server Test",
                 scope: "self-playground-go",
-                endpoint: `${window.location.origin}/api/go/verify`,
+                endpoint: `${window.location.origin}/api/go-verify`,
                 endpointType: "https", // HTTPS required for Self SDK
                 logoBase64: "https://i.imgur.com/Rz8B3s7.png",
                 userId,
