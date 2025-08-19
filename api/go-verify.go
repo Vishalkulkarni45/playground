@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -99,9 +100,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			self.Passport: true,
 			self.EUCard:   true,
 		}
+		// Get the host from the request to match the QR code endpoint
+		scheme := "https"
+		if r.Header.Get("X-Forwarded-Proto") != "" {
+			scheme = r.Header.Get("X-Forwarded-Proto")
+		}
+		host := r.Host
+		verifyEndpoint := fmt.Sprintf("%s://%s/api/go-verify", scheme, host)
+
 		verifier, err := self.NewBackendVerifier(
 			"self-playground-go",
-			"https://playground-two-psi.vercel.app/api/go-verify",
+			verifyEndpoint,
 			true, // Use testnet
 			allowedIds,
 			configStore,
