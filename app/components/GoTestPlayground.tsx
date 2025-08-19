@@ -27,7 +27,10 @@ function GoTestPlayground() {
 
     const checkGoServerStatus = async () => {
         try {
-            const response = await fetch('/api/go-health');
+            // Use OPTIONS request to go-saveOptions as a health check
+            const response = await fetch('/api/go-saveOptions', {
+                method: 'OPTIONS',
+            });
             if (response.ok) {
                 setGoServerStatus('connected');
             } else {

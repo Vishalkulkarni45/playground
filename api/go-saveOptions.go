@@ -1,9 +1,13 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
+
+	"playground/config"
 )
 
 type SaveOptionsRequest struct {
@@ -14,9 +18,6 @@ type SaveOptionsRequest struct {
 type SaveOptionsResponse struct {
 	Message string `json:"message"`
 }
-
-// In-memory storage for demo (in production, use a database)
-var optionsStore = make(map[string]interface{})
 
 func GoSaveOptions(w http.ResponseWriter, r *http.Request) {
 	// Enable CORS
@@ -57,12 +58,39 @@ func GoSaveOptions(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Store options in memory (in production, use proper database)
-	optionsStore[req.UserID] = req.Options
+	// Initialize Redis config store - matching TypeScript implementation
+	configStore, err := config.NewKVConfigStoreFromEnv()
+	if err != nil {
+		log.Printf("Failed to initialize config store: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Internal server error", "error": err.Error()})
+		return
+	}
+	defer configStore.Close()
+
+	// Store options in Redis with 30-minute expiration (matching TypeScript: ex: 1800)
+	ctx := context.Background()
+	optionsJSON, err := json.Marshal(req.Options)
+	if err != nil {
+		log.Printf("Failed to marshal options: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Internal server error", "error": "Failed to serialize options"})
+		return
+	}
+
+	// Use Redis SET with expiration (1800 seconds = 30 minutes, matching TypeScript)
+	err = configStore.SetWithExpiration(ctx, req.UserID, string(optionsJSON), 30*time.Minute)
+	if err != nil {
+		log.Printf("Failed to save options to Redis: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Internal server error", "error": "Failed to save options"})
+		return
+	}
+
 	log.Printf("Saved options for user: %s, options: %+v\n", req.UserID, req.Options)
 
 	response := SaveOptionsResponse{
-		Message: "Options saved successfully to Go server (Vercel)",
+		Message: "Options saved successfully",
 	}
 
 	json.NewEncoder(w).Encode(response)
