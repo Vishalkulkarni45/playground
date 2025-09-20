@@ -8,9 +8,14 @@ import { countries, SelfAppBuilder } from '@selfxyz/qrcode';
 import Image from 'next/image';
 import type { SelfApp } from '@selfxyz/common';
 
-// Import the QR code component with SSR disabled to prevent document references during server rendering
+// Import both React and Angular QR code components for comparison
 const SelfQRcodeWrapper = dynamic(
     () => import('@selfxyz/qrcode').then((mod) => mod.SelfQRcodeWrapper),
+    { ssr: false }
+);
+
+const AngularQRWrapper = dynamic(
+    () => import('./AngularQRWrapper'),
     { ssr: false }
 );
 
@@ -18,9 +23,12 @@ function Playground() {
     const [userId, setUserId] = useState<string | null>(null);
     const [savingOptions, setSavingOptions] = useState(false);
     const [selfApp, setSelfApp] = useState<SelfApp | null>(null);
+    const [useAngular, setUseAngular] = useState(false);
+    const [sharedSessionId, setSharedSessionId] = useState<string>('');
 
     useEffect(() => {
         setUserId(uuidv4());
+        setSharedSessionId(uuidv4()); // Generate shared session ID for both QR codes
     }, []);
 
     const [disclosures, setDisclosures] = useState<SelfAppDisclosureConfig>({
@@ -221,22 +229,54 @@ function Playground() {
             <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
                 <div className="w-full max-w-6xl flex flex-col md:flex-row gap-8">
                     <div className="w-full md:w-1/2 flex flex-col items-center justify-center">
-                        {selfApp ? (
-                            <SelfQRcodeWrapper
-                                selfApp={selfApp}
-                                onSuccess={() => {
-                                    console.log('Verification successful');
-                                }}
-                                darkMode={false}
-                                onError={() => {
-                                    console.error('Error generating QR code');
-                                }}
-                            />
+                        {/* Toggle between React and Angular QR codes */}
+                        <div className="mb-4">
+                            <button
+                                onClick={() => setUseAngular(!useAngular)}
+                                className={`px-4 py-2 rounded-md transition-colors ${useAngular
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-blue-600 text-white'
+                                    }`}
+                            >
+                                {useAngular ? '🅰️ Angular QR Code' : '⚛️ React QR Code'}
+                            </button>
+                            <p className="text-xs text-gray-500 mt-1 text-center">
+                                Click to toggle between React and Angular implementations
+                            </p>
+                        </div>
+
+                        {selfApp && sharedSessionId ? (
+                            useAngular ? (
+                                <AngularQRWrapper
+                                    selfApp={{ ...selfApp, sessionId: sharedSessionId }}
+                                    onSuccess={() => {
+                                        console.log('Angular QR: Verification successful');
+                                    }}
+                                    darkMode={false}
+                                    onError={(data) => {
+                                        console.error('Angular QR: Error generating QR code:', data);
+                                    }}
+                                />
+                            ) : (
+                                <SelfQRcodeWrapper
+                                    selfApp={{ ...selfApp, sessionId: sharedSessionId }}
+                                    onSuccess={() => {
+                                        console.log('React QR: Verification successful');
+                                    }}
+                                    darkMode={false}
+                                    onError={(data) => {
+                                        console.error('React QR: Error generating QR code:', data);
+                                    }}
+                                />
+                            )
                         ) : (
                             <p>Loading QR Code...</p>
                         )}
                         <p className="mt-4 text-sm text-gray-700">
                             User ID: {userId!.substring(0, 8)}...
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                            Currently using: {useAngular ? 'Angular SDK' : 'React SDK'}
                         </p>
                     </div>
 
