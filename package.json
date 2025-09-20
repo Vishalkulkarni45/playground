@@ -19,7 +19,7 @@
     "@angular/platform-browser-dynamic": "^18.0.0",
     "@selfxyz/core": "^1.0.4",
     "@selfxyz/qrcode": "^1.0.9",
-    "@selfxyz/qrcode-angular": "git+https://github.com/selfxyz/self.git#feat/qr-code-angular",
+    "@selfxyz/qrcode-angular": "file:../self/dist/qrcode-angular",
     "@vercel/kv": "^3.0.0",
     "geist": "^1.4.2",
     "next": "14.2.30",
